@@ -13,8 +13,6 @@ fn main() {
     text\n\
     # *test*".to_string();
     let tokens = tokenizer::tokenize(md);
-    for token_line in tokens {
-        let ast = parser::parse(token_line);
-        println!("{}", to_html::to_html(ast));
-    }
+    let ast = parser::parse(tokens);
+    println!("{}", to_html::to_html(ast));
 }

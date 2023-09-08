@@ -10,7 +10,15 @@ pub enum Node {
     List(Vec<Node>),
 }
 
-pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
+pub fn parse(tokens: Vec<Vec<Token>>) -> Vec<Vec<Node>> {
+    let mut nodes = Vec::new();
+    for line in tokens {
+        nodes.push(parse_line(line));
+    }
+    nodes
+}
+
+pub fn parse_line(tokens: Vec<Token>) -> Vec<Node> {
     let mut nodes = Vec::new();
 
     let mut tokens = tokens.into_iter();
@@ -21,13 +29,13 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
             },
             Token::Italic => {
                 nodes.push(Node::Italic(
-                    parse(vec![tokens.next().unwrap()])
+                    parse_line(vec![tokens.next().unwrap()])
                 ));
                 tokens.next();
             },
             Token::Bold => {
                 nodes.push(Node::Bold(
-                    parse(vec![tokens.next().unwrap()])
+                    parse_line(vec![tokens.next().unwrap()])
                 ));
 
                 tokens.next();
@@ -35,19 +43,19 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
             Token::Header(depth) => {
                 nodes.push(Node::Header(
                     depth,
-                    parse(tokens.clone().collect::<Vec<_>>())
+                    parse_line(tokens.clone().collect::<Vec<_>>())
                 ));
                 break;
             },
             Token::Blockquote => {
                 nodes.push(Node::Blockquote(
-                    parse(tokens.clone().collect::<Vec<_>>())
+                    parse_line(tokens.clone().collect::<Vec<_>>())
                 ));
                 break;
             },
             Token::List => {
                 nodes.push(Node::List(
-                    parse(tokens.clone().collect::<Vec<_>>())
+                    parse_line(tokens.clone().collect::<Vec<_>>())
                 ));
                 break;
             }
