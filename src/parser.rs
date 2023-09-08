@@ -7,6 +7,7 @@ pub enum Node {
     Italic(Vec<Node>),
     Header(u32, Vec<Node>),
     Blockquote(Vec<Node>),
+    List(Vec<Node>),
 }
 
 pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
@@ -40,6 +41,12 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
             },
             Token::Blockquote => {
                 nodes.push(Node::Blockquote(
+                    parse(tokens.clone().collect::<Vec<_>>())
+                ));
+                break;
+            },
+            Token::List => {
+                nodes.push(Node::List(
                     parse(tokens.clone().collect::<Vec<_>>())
                 ));
                 break;

@@ -19,6 +19,9 @@ pub fn to_html(ast: Vec<Node>) -> String {
             Node::Blockquote(child) => {
                 html.push_str(&format!("<blockquote>{}</blockquote>", to_html(child)));
             },
+            Node::List(child) => {
+                html.push_str(&format!("<ul><li>{}</li></ul>", to_html(child)));
+            },
             _ => {},
         }
     }

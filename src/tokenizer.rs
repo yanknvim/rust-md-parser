@@ -5,6 +5,7 @@ pub enum Token {
     Italic,
     Header(u32),
     Blockquote,
+    List,
 }
 
 pub fn tokenize(s: String) -> Vec<Vec<Token>> {
@@ -58,6 +59,12 @@ pub fn tokenize_line(line: String) -> Vec<Token> {
                     tokens.push(Token::Bold)
                 }
             },
+            '-' => {
+                while let Some(' ') = chars.peek() {
+                    chars.next();
+                }
+                tokens.push(Token::List);
+            }
             _ => buffer.push(c),
         }
     }
