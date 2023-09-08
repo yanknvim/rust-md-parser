@@ -37,7 +37,6 @@ pub fn parse_line(tokens: Vec<Token>) -> Vec<Node> {
                 nodes.push(Node::Bold(
                     parse_line(vec![tokens.next().unwrap()])
                 ));
-
                 tokens.next();
             },
             Token::Header(depth) => {
