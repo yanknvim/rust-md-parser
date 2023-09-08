@@ -53,10 +53,14 @@ pub fn tokenize_line(line: String) -> Vec<Token> {
                 while let Some(' ') = chars.peek() {
                     chars.next();
                 }
-                if depth == 1 {
-                    tokens.push(Token::Italic)
-                } else if depth == 2 {
-                    tokens.push(Token::Bold)
+                match depth {
+                    1 => tokens.push(Token::Italic),
+                    2 => tokens.push(Token::Bold),
+                    3 => {
+                        tokens.push(Token::Italic);
+                        tokens.push(Token::Bold);
+                    },
+                    _ => {}
                 }
             },
             '-' => {
