@@ -1,20 +1,12 @@
-use crate::tokenizer::{Token, TokenKind};
+use crate::tokenizer::Token;
 
 #[derive(Debug, Clone)]
-pub enum NodeKind {
-    Text,
-    Bold,
-    Italic,
-    Header,
-    Blockquote,
-}
-
-#[derive(Debug, Clone)]
-pub struct Node {
-    pub kind: NodeKind,
-    pub str: String,
-    pub depth: u32,
-    pub child: Option<Box<Vec<Node>>>,
+pub enum Node {
+    Text(String),
+    Bold(Vec<Node>),
+    Italic(Vec<Node>),
+    Header(u32, Vec<Node>),
+    Blockquote(Vec<Node>),
 }
 
 pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
@@ -22,58 +14,35 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Node> {
 
     let mut tokens = tokens.into_iter();
     while let Some(token) = tokens.next() {
-        match token.kind {
-            TokenKind::Text => {
-                nodes.push(Node {
-                    kind: NodeKind::Text,
-                    str: token.str,
-                    depth: 0,
-                    child: None,
-                });
+        match token {
+            Token::Text(text)=> {
+                nodes.push(Node::Text(text));
             },
-            TokenKind::Italic => {
-                nodes.push(Node {
-                    kind: NodeKind::Italic,
-                    str: token.str,
-                    depth: 0,
-                    child: Some(Box::new(vec![Node {
-                        kind: NodeKind::Text,
-                        str: tokens.next().unwrap().str,
-                        depth: 0,
-                        child: None,
-                    }]))
-                });
+            Token::Italic => {
+                nodes.push(Node::Italic(
+                    parse(vec![tokens.next().unwrap()])
+                ));
                 tokens.next();
             },
-            TokenKind::Bold => {
-                nodes.push(Node {
-                    kind: NodeKind::Bold,
-                    str: token.str,
-                    depth: 0,
-                    child: Some(Box::new(vec![Node {
-                        kind: NodeKind::Text,
-                        str: tokens.next().unwrap().str,
-                        depth: 0,
-                        child: None,
-                    }]))
-                });
+            Token::Bold => {
+                nodes.push(Node::Bold(
+                    parse(vec![tokens.next().unwrap()])
+                ));
+
                 tokens.next();
             },
-            TokenKind::Header => {
-                nodes.push(Node {
-                    kind:NodeKind::Header,
-                    str: token.str,
-                    depth: token.depth,
-                    child: Some(Box::new(parse(tokens.clone().collect()))),
-                })
+            Token::Header(depth) => {
+                nodes.push(Node::Header(
+                    depth,
+                    parse(tokens.clone().collect::<Vec<_>>())
+                ));
+                break;
             },
-            TokenKind::Blockquote => {
-                nodes.push(Node {
-                    kind:NodeKind::Blockquote,
-                    str: token.str,
-                    depth: token.depth,
-                    child: Some(Box::new(parse(tokens.clone().collect()))),
-                })
+            Token::Blockquote => {
+                nodes.push(Node::Blockquote(
+                    parse(tokens.clone().collect::<Vec<_>>())
+                ));
+                break;
             }
             _ => {},
         }

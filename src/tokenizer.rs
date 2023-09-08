@@ -1,17 +1,10 @@
 #[derive(Debug, Clone)]
-pub enum TokenKind {
-    Text,
+pub enum Token {
+    Text(String),
     Bold,
     Italic,
-    Header,
+    Header(u32),
     Blockquote,
-}
-
-#[derive(Debug, Clone)]
-pub struct Token {
-    pub kind: TokenKind,
-    pub str: String,
-    pub depth: u32,
 }
 
 pub fn tokenize(s: String) -> Vec<Vec<Token>> {
@@ -38,21 +31,13 @@ pub fn tokenize_line(line: String) -> Vec<Token> {
                 while let Some(' ') = chars.peek() {
                     chars.next();
                 }
-                tokens.push(Token {
-                    kind: TokenKind::Header,
-                    str: "#".to_string(),
-                    depth: depth,
-                })
+                tokens.push(Token::Header(depth));
             },
             '>' => {
                 while let Some(' ') = chars.peek() {
                     chars.next();
                 }
-                tokens.push(Token {
-                    kind: TokenKind::Blockquote,
-                    str: ">".to_string(),
-                    depth: 0,
-                })
+                tokens.push(Token::Blockquote);
             },
             '*' => {
                 let mut depth = 1;
@@ -61,39 +46,23 @@ pub fn tokenize_line(line: String) -> Vec<Token> {
                     chars.next();
                 }
                 if !buffer.is_empty() {
-                    tokens.push(Token {
-                        kind: TokenKind::Text,
-                        str: buffer.clone(),
-                        depth: 0,
-                    });
+                    tokens.push(Token::Text(buffer.clone()));
                     buffer.clear();
                 }
                 while let Some(' ') = chars.peek() {
                     chars.next();
                 }
                 if depth == 1 {
-                    tokens.push(Token {
-                        kind: TokenKind::Italic,
-                        str: "*".to_string(),
-                        depth: depth,
-                    })
+                    tokens.push(Token::Italic)
                 } else if depth == 2 {
-                    tokens.push(Token {
-                        kind: TokenKind::Bold,
-                        str: "**".to_string(),
-                        depth: depth
-                    })
+                    tokens.push(Token::Bold)
                 }
             },
             _ => buffer.push(c),
         }
     }
     if !buffer.is_empty() {
-        tokens.push(Token {
-            kind: TokenKind::Text,
-            str: buffer.clone(),
-            depth: 0,
-        });
+        tokens.push(Token::Text(buffer.clone()));
         buffer.clear();
     }
     tokens
